@@ -8,7 +8,6 @@
 import Foundation
 
 final class DefaultDataTransferService: DataTransferService {
-    
     private let networkService: NetworkService
     private let errorResolver: DataTransferErrorResolver
     private let errorLogger: DataTransferErrorLogger

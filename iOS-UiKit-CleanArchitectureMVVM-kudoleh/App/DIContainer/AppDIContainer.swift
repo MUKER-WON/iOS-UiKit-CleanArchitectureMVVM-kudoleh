@@ -21,9 +21,7 @@ final class AppDIContainer {
             ]
         )
         let apiDataNetwork = DefaultNetworkService(config: config)
-        return DefaultDataTransferService(
-            networkService: apiDataNetwork
-        )
+        return DefaultDataTransferService(networkService: apiDataNetwork)
     }()
     
     lazy var imageDataTransferService: DataTransferService = {
@@ -33,6 +31,14 @@ final class AppDIContainer {
         let imagesDataNetwork = DefaultNetworkService(config: config)
         return DefaultDataTransferService(networkService: imagesDataNetwork)
     }()
+    
+    func makeMoviesSceneDIContainer() -> MoviesSceneDIContainer {
+        let dependencies = MoviesSceneDIContainer.Dependencies(
+            apiDataTransferService: apiDataTransferService,
+            imageDataTransferService: imageDataTransferService
+        )
+        return MoviesSceneDIContainer(dependencies: dependencies)
+    }
     
 
 }

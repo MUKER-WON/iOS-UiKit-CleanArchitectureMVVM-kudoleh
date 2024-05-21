@@ -18,6 +18,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         return true
     }
+    
+    // 앱이 백그라운드 상태가 될 때
+    func applicationDidEnterBackground(
+        _ application: UIApplication
+    ) {
+        CoreDataStorage.shared.saveContext()
+    }
 
     // MARK: UISceneSession Lifecycle
 

@@ -10,13 +10,13 @@ import Foundation
 final class EndPoint<R>: ResponseRequestable {
     typealias Response = R
     
-    let path: String
+    let path: String // 세부경로, api.naver.com/search 에서 search
     let isFullPath: Bool
     let method: HTTPMethodType
     let headerParameters: [String : String]
-    let queryParametersEncodable: (any Encodable)?
+    let queryParametersEncodable: Encodable?
     let queryParameters: [String : Any]
-    let bodyParametersEncodable: (any Encodable)?
+    let bodyParametersEncodable: Encodable?
     let bodyParameters: [String : Any]
     let bodyEncoder: BodyEncoder
     let responseDecoder: ResponseDecoder
@@ -26,9 +26,9 @@ final class EndPoint<R>: ResponseRequestable {
         isFullPath: Bool = false,
         method: HTTPMethodType,
         headerParameters: [String : String] = [:],
-        queryParametersEncodable: (any Encodable)? = nil,
+        queryParametersEncodable: Encodable? = nil,
         queryParameters: [String : Any] = [:],
-        bodyParametersEncodable: (any Encodable)? = nil,
+        bodyParametersEncodable: Encodable? = nil,
         bodyParameters: [String : Any] = [:],
         bodyEncoder: BodyEncoder = JSONBodyEncoder(),
         responseDecoder: ResponseDecoder = JSONResponseDecoder()
@@ -49,7 +49,6 @@ final class EndPoint<R>: ResponseRequestable {
 // MARK: - [JsonBodyEncoder]
 
 struct JSONBodyEncoder: BodyEncoder {
-    // TODO: JSONSerialization -> Codable
     func encode(parameters: [String : Any]) -> Data? {
         return try? JSONSerialization.data(withJSONObject: parameters)
     }
@@ -70,38 +69,6 @@ struct AsciiBodyEncoder: BodyEncoder {
 // MARK: - Extention
 
 extension Requestable {
-    func url(config: NetworkConfigurable) throws -> URL {
-        let baseURL = config.baseURL.absoluteString.last != "/"
-        ? config.baseURL.absoluteString + "/"
-        : config.baseURL.absoluteString
-        let endPoint = isFullPath ? path : baseURL.appending(path)
-        guard var urlComponents = URLComponents(string: endPoint)
-        else {
-            throw RequestGenerationError.components
-        }
-        var urlQueryItems = [URLQueryItem]()
-        let queryParameters = try queryParametersEncodable?.toDictionary()
-        ?? self.queryParameters
-        queryParameters.forEach {
-            urlQueryItems.append(URLQueryItem(
-                name: $0.key,
-                value: "\($0.value)")
-            )
-        }
-        config.queryParameters.forEach {
-            urlQueryItems.append(URLQueryItem(
-                name: $0.key,
-                value: $0.value)
-            )
-        }
-        urlComponents.queryItems = !urlQueryItems.isEmpty
-        ? urlQueryItems
-        : nil
-        guard let url = urlComponents.url
-        else { throw RequestGenerationError.components }
-        return url
-    }
-    
     func urlRequest(
         config: NetworkConfigurable
     ) throws -> URLRequest {
@@ -119,6 +86,41 @@ extension Requestable {
         urlRequest.httpMethod = method.rawValue
         urlRequest.allHTTPHeaderFields = headers
         return urlRequest
+    }
+    
+    private func url(config: NetworkConfigurable) throws -> URL {
+        var urlComponent = URLComponents()
+        let baseURL = config.baseURL.absoluteString.last != "/"
+        ? config.baseURL.absoluteString + "/"
+        : config.baseURL.absoluteString
+        let endPoint = isFullPath ? path : baseURL.appending(path)
+        guard var urlComponents = URLComponents(string: endPoint)
+        else {
+            throw RequestGenerationError.components
+        }
+        var urlQueryItems = [URLQueryItem]()
+        let queryParameters = try queryParametersEncodable?.toDictionary()
+        ?? self.queryParameters
+        // 동적으로 변하는 queryParameter
+        queryParameters.forEach {
+            urlQueryItems.append(URLQueryItem(
+                name: $0.key,
+                value: "\($0.value)"
+            ))
+        }
+        // 미리 설정해둔 지정 queryParamter
+        config.queryParameters.forEach {
+            urlQueryItems.append(URLQueryItem(
+                name: $0.key,
+                value: $0.value
+            ))
+        }
+        urlComponents.queryItems = !urlQueryItems.isEmpty
+        ? urlQueryItems
+        : nil
+        guard let url = urlComponents.url
+        else { throw RequestGenerationError.components }
+        return url
     }
 }
 

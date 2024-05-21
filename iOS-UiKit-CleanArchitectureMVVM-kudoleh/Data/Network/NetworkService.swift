@@ -8,7 +8,6 @@
 import Foundation
 
 final class DefaultNetworkService: NetworkService {
-    
     private let config: NetworkConfigurable
     private let sessionManager: NetworkSessionManager
     private let logger: NetworkErrorLogger

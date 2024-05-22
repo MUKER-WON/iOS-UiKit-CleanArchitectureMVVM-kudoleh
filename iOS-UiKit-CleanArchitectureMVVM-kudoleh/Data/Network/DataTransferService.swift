@@ -25,8 +25,8 @@ final class DefaultDataTransferService: DataTransferService {
     }
     
     func request<T: Decodable, E: ResponseRequestable>(
-        endPoint: E,
-        queue: DataTransferDispatchQueue,
+        with endPoint: E,
+        on queue: DataTransferDispatchQueue,
         completion: @escaping CompletionHandler<T>
     ) -> NetworkCancellable? where T == E.Response {
         networkService.request(endPoint: endPoint) { result in
@@ -50,19 +50,19 @@ final class DefaultDataTransferService: DataTransferService {
     }
     
     func request<T: Decodable, E: ResponseRequestable>(
-        endPoint: E,
+        with endPoint: E,
         completion: @escaping CompletionHandler<T>
     ) -> NetworkCancellable? where T == E.Response {
         return request(
-            endPoint: endPoint,
-            queue: DispatchQueue.main,
+            with: endPoint,
+            on: DispatchQueue.main,
             completion: completion
         )
     }
     
     func request<E: ResponseRequestable>(
-        endPoint: E,
-        queue: DataTransferDispatchQueue,
+        with endPoint: E,
+        on queue: DataTransferDispatchQueue,
         completion: @escaping CompletionHandler<Void>
     ) -> NetworkCancellable? where E.Response == Void {
         networkService.request(endPoint: endPoint) { result in
@@ -82,12 +82,12 @@ final class DefaultDataTransferService: DataTransferService {
     }
     
     func request<E: ResponseRequestable>(
-        endPoint: E,
+        with endPoint: E,
         completion: @escaping CompletionHandler<Void>
     ) -> NetworkCancellable? where E.Response == Void {
         request(
-            endPoint: endPoint,
-            queue: DispatchQueue.main,
+            with: endPoint,
+            on: DispatchQueue.main,
             completion: completion
         )
     }
@@ -202,27 +202,27 @@ protocol DataTransferService {
     
     @discardableResult
     func request<T: Decodable, E: ResponseRequestable>(
-        endPoint: E,
-        queue: DataTransferDispatchQueue,
+        with endPoint: E,
+        on queue: DataTransferDispatchQueue,
         completion: @escaping CompletionHandler<T>
     ) -> NetworkCancellable? where T == E.Response
     
     @discardableResult
     func request<T: Decodable, E: ResponseRequestable>(
-        endPoint: E,
+        with endPoint: E,
         completion: @escaping CompletionHandler<T>
     ) -> NetworkCancellable? where T == E.Response
     
     @discardableResult
     func request<E: ResponseRequestable>(
-        endPoint: E,
-        queue: DataTransferDispatchQueue,
+        with endPoint: E,
+        on queue: DataTransferDispatchQueue,
         completion: @escaping CompletionHandler<Void>
     ) -> NetworkCancellable? where E.Response == Void
     
     @discardableResult
     func request<E: ResponseRequestable>(
-        endPoint: E,
+        with endPoint: E,
         completion: @escaping CompletionHandler<Void>
     ) -> NetworkCancellable? where E.Response == Void
 }

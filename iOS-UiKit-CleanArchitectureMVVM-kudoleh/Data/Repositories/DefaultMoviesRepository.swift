@@ -45,8 +45,8 @@ extension DefaultMoviesRepository: MoviesRepository {
             guard !task.isCancelled else { return }
             let endPoint = APIEndPoints.getMovies(with: requestDTO)
             task.networkTask = self?.dataTransferService.request(
-                endPoint: endPoint,
-                queue: backgroundQueue
+                with: endPoint,
+                on: backgroundQueue
             ) { result in
                 switch result {
                 case .success(let responseDTO):
